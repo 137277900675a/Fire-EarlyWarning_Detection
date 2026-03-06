@@ -1,0 +1,242 @@
+# ============================================================
+# 四种迁移学习策略对比配置
+# 参考PPT: 图像分类-迁移学习
+# 方案1: 从头训练 (Scratch Training) - 不使用预训练权重
+# 方案2: 特征提取 (Feature Extraction) - 冻结大部分层，仅训练顶层
+# 方案3: 微调 (Fine-tuning) - 解冻部分预训练层
+# 方案4: 全参数微调 (Full Fine-tuning) - 训练所有参数
+# ============================================================
+
+# ============================================================
+# 方案1: 从头训练 (Scratch Training)
+# 不使用任何预训练权重，从随机初始化开始训练
+# ============================================================
+strategy_1_scratch:
+  name: "从头训练"
+  description: "不使用预训练权重，从随机初始化开始训练"
+  
+  # 关键：不使用预训练权重
+  pretrained: false
+  weights: null
+  
+  # 训练参数 - 需要更多epoch和更强的正则化
+  epochs: 200
+  batch_size: 32
+  learning_rate: 0.01     # 较高的学习率
+  warmup_epochs: 10
+  
+  # 优化器参数
+  optimizer: "SGD"
+  momentum: 0.937
+  weight_decay: 0.0005
+  
+  # 正则化 - 防止过拟合
+  dropout: 0.5
+  label_smoothing: 0.1
+  
+  # 适用场景
+  suitable_for: "基线对比实验、研究随机初始化vs预训练的效果"
+  
+  # 优点
+  advantages:
+    - "可作为基线对比"
+    - "完全适应新任务"
+    - "不受预训练偏差影响"
+  
+  # 缺点
+  disadvantages:
+    - "训练时间最长"
+    - "需要大量数据"
+    - "精度通常较低"
+
+# ============================================================
+# 方案2: 特征提取 (Feature Extraction)
+# 冻结预训练模型的大部分层，仅训练新添加的顶层
+# PPT参考: "冻结预训练模型的大部分层，仅训练新添加的顶层"
+# ============================================================
+strategy_2_feature_extraction:
+  name: "特征提取"
+  description: "冻结预训练模型的大部分层，仅训练新添加的顶层分类器"
+  
+  # 关键：使用预训练权重，冻结大部分层
+  pretrained: true
+  weights: "yolov8s.pt"
+  
+  # 冻结模式
+  freeze_mode: "feature_extraction"
+  
+  # 训练参数
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.001
+  warmup_epochs: 3
+  
+  # 优化器参数
+  optimizer: "SGD"
+  momentum: 0.937
+  weight_decay: 0.0005
+  
+  # 适用场景
+  suitable_for: "小数据集(<1000)、计算资源有限、快速验证"
+  
+  # 优点
+  advantages:
+    - "收敛速度快"
+    - "内存占用少"
+    - "不易过拟合"
+    - "训练时间短"
+  
+  # 缺点
+  disadvantages:
+    - "精度可能受限"
+    - "特征适应性较差"
+
+# ============================================================
+# 方案3: 微调 (Fine-tuning)
+# 解冻部分预训练层（通常靠近输出的高层），与新层一起训练
+# PPT参考: "解冻部分预训练层，与新增层一起训练"
+# ============================================================
+strategy_3_fine_tuning:
+  name: "微调"
+  description: "解冻预训练模型的部分高层层，与检测头一起训练"
+  
+  # 关键：使用预训练权重，解冻部分层
+  pretrained: true
+  weights: "yolov8s.pt"
+  
+  # 冻结模式
+  freeze_mode: "partial_unfreeze"
+  unfreeze_layers: "last_2_stages"  # 解冻最后2个stage
+  
+  # 分层学习率
+  layer_lr_multiplier:
+    frozen: 0.1      # 冻结层学习率乘数
+    unfrozen: 1.0    # 解冻层学习率乘数
+  
+  # 训练参数
+  epochs: 100
+  batch_size: 32
+  learning_rate: 0.0005
+  warmup_epochs: 5
+  
+  # 优化器参数
+  optimizer: "SGD"
+  momentum: 0.937
+  weight_decay: 0.0005
+  
+  # 适用场景
+  suitable_for: "中等数据集(1000-5000)、需要平衡精度和效率"
+  
+  # 优点
+  advantages:
+    - "保留预训练知识"
+    - "适应新任务特征"
+    - "平衡精度和训练时间"
+  
+  # 缺点
+  disadvantages:
+    - "需要调整解冻层数"
+    - "学习率需要仔细设置"
+
+# ============================================================
+# 方案4: 全参数微调 (Full Fine-tuning)
+# 载入权重后训练所有参数
+# PPT参考: "载入权重后训练所有参数"
+# ============================================================
+strategy_4_full_finetuning:
+  name: "全参数微调"
+  description: "解冻所有预训练层，对整个网络进行微调训练"
+  
+  # 关键：使用预训练权重，解冻所有层
+  pretrained: true
+  weights: "yolov8s.pt"
+  
+  # 冻结模式
+  freeze_mode: "full_unfreeze"
+  
+  # 训练参数
+  epochs: 150
+  batch_size: 16
+  learning_rate: 0.0001   # 较低的学习率
+  warmup_epochs: 10
+  
+  # 优化器参数
+  optimizer: "SGD"
+  momentum: 0.937
+  weight_decay: 0.0005
+  
+  # 正则化
+  dropout: 0.5
+  label_smoothing: 0.1
+  
+  # 适用场景
+  suitable_for: "大数据集(>5000)、充足GPU资源、追求最高精度"
+  
+  # 优点
+  advantages:
+    - "最高精度"
+    - "充分利用数据"
+    - "特征完全适应新任务"
+  
+  # 缺点
+  disadvantages:
+    - "训练时间长"
+    - "计算资源需求大"
+    - "容易过拟合"
+
+# ============================================================
+# 通用训练参数 (最佳实践)
+# ============================================================
+
+common_params:
+  # 模型配置
+  model:
+    base_model: "yolov8s"
+    imgsz: 640
+    device: 0
+
+  # 数据增强 (火焰烟雾检测专用)
+  augmentation:
+    hsv_h: 0.015       # HSV-色调偏移
+    hsv_s: 0.7         # HSV-饱和度偏移 (火焰颜色识别)
+    hsv_v: 0.4         # HSV-值偏移
+    degrees: 10.0       # 旋转角度
+    translate: 0.1      # 平移比例
+    scale: 0.5         # 缩放比例
+    flipud: 0.5        # 上下翻转
+    fliplr: 0.5        # 左右翻转
+    mosaic: 1.0        # Mosaic增强
+
+  # 优化器配置
+  optimizer:
+    type: "SGD"
+    lr0: 0.01
+    lrf: 0.01
+    momentum: 0.937
+    weight_decay: 0.0005
+
+  # 学习率调度
+  lr_scheduler:
+    type: "cosine"
+    warmup_epochs: 5
+
+  # 训练策略
+  training:
+    close_mosaic: 15
+    amp: true
+    workers: 8
+    verbose: true
+    seed: 42
+
+  # 验证配置
+  validation:
+    val_period: 5
+    save_period: 10
+    conf_threshold: 0.25
+    iou_threshold: 0.45
+
+  # 输出配置
+  output:
+    project: "runs/transfer_learning"
+    exist_ok: false
+    save: true

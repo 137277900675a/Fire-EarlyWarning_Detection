@@ -1,0 +1,133 @@
+common_params:
+  augmentation:
+    degrees: 10.0
+    fliplr: 0.5
+    flipud: 0.5
+    hsv_h: 0.015
+    hsv_s: 0.7
+    hsv_v: 0.4
+    mosaic: 1.0
+    scale: 0.5
+    translate: 0.1
+  lr_scheduler:
+    type: cosine
+    warmup_epochs: 5
+  model:
+    base_model: yolov8s
+    device: 0
+    imgsz: 640
+  optimizer:
+    lr0: 0.01
+    lrf: 0.01
+    momentum: 0.937
+    type: SGD
+    weight_decay: 0.0005
+  output:
+    exist_ok: false
+    project: runs/transfer_learning
+    save: true
+  training:
+    amp: true
+    close_mosaic: 15
+    seed: 42
+    verbose: true
+    workers: 8
+  validation:
+    conf_threshold: 0.25
+    iou_threshold: 0.45
+    save_period: 10
+    val_period: 5
+strategy_1_scratch:
+  advantages:
+  - 可作为基线对比
+  - 完全适应新任务
+  - 不受预训练偏差影响
+  batch_size: 32
+  description: 不使用预训练权重，从随机初始化开始训练
+  disadvantages:
+  - 训练时间最长
+  - 需要大量数据
+  - 精度通常较低
+  dropout: 0.5
+  epochs: 200
+  label_smoothing: 0.1
+  learning_rate: 0.01
+  momentum: 0.937
+  name: 从头训练
+  optimizer: SGD
+  pretrained: false
+  suitable_for: 基线对比实验、研究随机初始化vs预训练的效果
+  warmup_epochs: 10
+  weight_decay: 0.0005
+  weights: null
+strategy_2_feature_extraction:
+  advantages:
+  - 收敛速度快
+  - 内存占用少
+  - 不易过拟合
+  - 训练时间短
+  batch_size: 32
+  description: 冻结预训练模型的大部分层，仅训练新添加的顶层分类器
+  disadvantages:
+  - 精度可能受限
+  - 特征适应性较差
+  epochs: 50
+  freeze_mode: feature_extraction
+  learning_rate: 0.001
+  momentum: 0.937
+  name: 特征提取
+  optimizer: SGD
+  pretrained: true
+  suitable_for: 小数据集(<1000)、计算资源有限、快速验证
+  warmup_epochs: 3
+  weight_decay: 0.0005
+  weights: yolov8s.pt
+strategy_3_fine_tuning:
+  advantages:
+  - 保留预训练知识
+  - 适应新任务特征
+  - 平衡精度和训练时间
+  batch_size: 32
+  description: 解冻预训练模型的部分高层层，与检测头一起训练
+  disadvantages:
+  - 需要调整解冻层数
+  - 学习率需要仔细设置
+  epochs: 100
+  freeze_mode: partial_unfreeze
+  layer_lr_multiplier:
+    frozen: 0.1
+    unfrozen: 1.0
+  learning_rate: 0.0005
+  momentum: 0.937
+  name: 微调
+  optimizer: SGD
+  pretrained: true
+  suitable_for: 中等数据集(1000-5000)、需要平衡精度和效率
+  unfreeze_layers: last_2_stages
+  warmup_epochs: 5
+  weight_decay: 0.0005
+  weights: yolov8s.pt
+strategy_4_full_finetuning:
+  advantages:
+  - 最高精度
+  - 充分利用数据
+  - 特征完全适应新任务
+  batch_size: 16
+  description: 解冻所有预训练层，对整个网络进行微调训练
+  disadvantages:
+  - 训练时间长
+  - 计算资源需求大
+  - 容易过拟合
+  dropout: 0.5
+  epochs: 150
+  freeze_mode: full_unfreeze
+  label_smoothing: 0.1
+  learning_rate: 0.0001
+  momentum: 0.937
+  name: 全参数微调
+  optimizer: SGD
+  pretrained: true
+  suitable_for: 大数据集(>5000)、充足GPU资源、追求最高精度
+  warmup_epochs: 10
+  weight_decay: 0.0005
+  weights: yolov8s.pt

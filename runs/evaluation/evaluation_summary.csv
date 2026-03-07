@@ -1,0 +1,5 @@
+﻿strategy_key,strategy_name,mAP50,mAP95,precision,recall,epochs,training_time_min,status,F1,overall_score
+full_finetuning,全参数微调,0.9475,0.6586,0.9459,0.9145,150,90.4361,success,0.9299,85.3906
+fine_tuning,微调,0.9479,0.6522,0.9289,0.9157,100,35.2522,success,0.9223,84.8945
+scratch,从头训练,0.945,0.6281,0.947,0.9091,200,67.494,success,0.9277,84.3161
+feature_extraction,特征提取,0.9492,0.6389,0.9321,0.8995,50,17.9757,success,0.9155,84.2754

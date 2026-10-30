@@ -1,0 +1,46 @@
+{
+  "scratch": {
+    "strategy_name": "从头训练",
+    "epochs_trained": 200,
+    "best_map50": 0.9450112022937749,
+    "best_map95": 0.6281038823633223,
+    "best_precision": 0.9470178022316257,
+    "best_recall": 0.9091151812800968,
+    "training_time": 4049.641453,
+    "model_path": "runs/multi_strategy/strategy_1_scratch/train/weights/best.pt",
+    "status": "success"
+  },
+  "feature_extraction": {
+    "strategy_name": "特征提取",
+    "epochs_trained": 50,
+    "best_map50": 0.9492149649692891,
+    "best_map95": 0.638940810837344,
+    "best_precision": 0.9320669432358327,
+    "best_recall": 0.8994708593990619,
+    "training_time": 1078.542911,
+    "model_path": "runs/multi_strategy/strategy_2_feature_extraction/train/weights/best.pt",
+    "status": "success"
+  },
+  "fine_tuning": {
+    "strategy_name": "微调",
+    "epochs_trained": 100,
+    "best_map50": 0.947896084077942,
+    "best_map95": 0.6521823607654833,
+    "best_precision": 0.9288975059740494,
+    "best_recall": 0.9157122462336436,
+    "training_time": 2115.133952,
+    "model_path": "runs/multi_strategy/strategy_3_fine_tuning/train/weights/best.pt",
+    "status": "success"
+  },
+  "full_finetuning": {
+    "strategy_name": "全参数微调",
+    "epochs_trained": 150,
+    "best_map50": 0.9475095465429456,
+    "best_map95": 0.658568143772843,
+    "best_precision": 0.9458687354167035,
+    "best_recall": 0.9145458821262378,
+    "training_time": 5426.163085,
+    "model_path": "runs/multi_strategy/strategy_4_full_finetuning/train/weights/best.pt",
+    "status": "success"
+  }
+}
